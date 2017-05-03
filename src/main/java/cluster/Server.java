@@ -6,6 +6,7 @@ import state.ServerSessionState;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Server {
     @Getter
@@ -27,7 +28,7 @@ public class Server {
         private final int port;
         private ArrayList<Peer> peers;
         private ServerState serverState;
-        private long term = 0;
+        private AtomicInteger term = new AtomicInteger(0);
 
         public Builder(int port){
             this.port = port;
@@ -44,7 +45,7 @@ public class Server {
             this.serverState = serverState;
             return this;
         }
-        public Builder withTerm(long term){
+        public Builder withTerm(AtomicInteger term){
             this.term = term;
             return this;
         }

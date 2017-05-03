@@ -16,8 +16,6 @@ public class NettyClient {
     }
 
     public ChannelFuture connectLoop() throws Exception {
-
-
         try {
             Bootstrap b = new Bootstrap(); // (1)
             b.group(workerGroup); // (2)
