@@ -37,7 +37,7 @@ public class NettyServer {
                         .childHandler(new ChannelInitializer<SocketChannel>() { // (4)
                             @Override
                             public void initChannel(SocketChannel ch) throws Exception {
-                                ch.pipeline().addLast(new NettyServerHandler());
+                                ch.pipeline().addLast(new NettyHandler());
                             }
                         })
                         .option(ChannelOption.SO_BACKLOG, 128)          // (5)
@@ -49,12 +49,12 @@ public class NettyServer {
 
                 this.channel = f.channel();
                 this.channelFuture = f;
-                //f.channel().closeFuture().sync();
+                f.channel().closeFuture().sync();
             }
             catch(Exception e) {
                 logger.info("Exception in server thread");
             }finally {
-
+                shutdown();
             }
         }).join();
     }

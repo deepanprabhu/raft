@@ -14,27 +14,26 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 
-public class ServerFlow{
+public class ServerFlow {
+
     static Logger staticLogger = LoggerFactory.getLogger(ServerFlow.class);
     Logger logger = LoggerFactory.getLogger(ServerFlow.class);
-    public static Map<Server, Channel> channelMap = new ConcurrentHashMap<>();
-    public static Map<Peer, Channel> peerChannelMap = new ConcurrentHashMap<>();
 
     public static ChannelFuture OpenServerPort(Server s) {
         try {
             NettyServer nettyServer = new NettyServer(s.getPort());
             nettyServer.connectLoop();
-            channelMap.put(s, nettyServer.getChannel());
+            s.getChannelMap().put(s, nettyServer.getChannel());
             staticLogger.info("Initialized Server port");
 
             return nettyServer.getChannelFuture();
-        }
-        catch(Exception e){
+        } catch (Exception e) {
 
         }
         return null;
     }
-    public static void connectToPeer(Peer peer){
+
+    public static void connectToPeer(Server s, Peer peer) {
         int retries = 5;
         try {
             do {
@@ -42,15 +41,15 @@ public class ServerFlow{
                     boolean retryRequest = true;
                     try {
                         NettyClient client = new NettyClient(peer.getPort());
-                        ChannelFuture channelFuture = client.connectLoop();
+                        client.connectLoop();
+                        ChannelFuture channelFuture = client.getChannelFuture();
                         Thread.sleep(5000);
                         if (channelFuture.isSuccess()) {
                             retryRequest = false;
-                            peerChannelMap.put(peer, channelFuture.channel());
+                            s.getPeerChannelMap().put(peer, channelFuture.channel());
                             staticLogger.info("Connected to peer " + peer.getPort());
                             // channelFuture.sync();
-                        }
-                        else{
+                        } else {
                             staticLogger.info("Unable to connect to peer " + peer.getPort());
                         }
                     } catch (Exception e) {
@@ -58,13 +57,12 @@ public class ServerFlow{
                     return retryRequest;
                 });
                 if (retry.get() == false)
-                    if(retry.isDone())
+                    if (retry.isDone())
                         break;
                 staticLogger.info("Retry effort " + retries + " for peer " + peer.getPort());
             }
             while (retries-- > 0);
-        }
-        catch(Exception e){
+        } catch (Exception e) {
 
         }
     }

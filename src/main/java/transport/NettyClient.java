@@ -5,17 +5,21 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import lombok.Getter;
 
 public class NettyClient {
     EventLoopGroup workerGroup = new NioEventLoopGroup();
     int port;
     Channel channel;
 
+    @Getter
+    ChannelFuture channelFuture;
+
     public NettyClient(int port){
         this.port = port;
     }
 
-    public ChannelFuture connectLoop() throws Exception {
+    public void connectLoop() throws Exception {
         try {
             Bootstrap b = new Bootstrap(); // (1)
             b.group(workerGroup); // (2)
@@ -24,17 +28,16 @@ public class NettyClient {
             b.handler(new ChannelInitializer<SocketChannel>() {
                 @Override
                 public void initChannel(SocketChannel ch) throws Exception {
-                    ch.pipeline().addLast(new NettyClientHandler());
+                    ch.pipeline().addLast(new NettyHandler());
                 }
             });
 
             // Start the client.
             ChannelFuture f = b.connect("127.0.0.1", port).sync(); // (5)
             this.channel = f.channel();
-
-            return f;
+            this.channelFuture = f;
+            //f.channel().closeFuture().sync();
         } finally {
-
         }
     }
     public void shutdown(){

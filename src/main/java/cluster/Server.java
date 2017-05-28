@@ -1,11 +1,14 @@
 package cluster;
 
+import io.netty.channel.Channel;
 import lombok.Getter;
 import lombok.Setter;
 import state.ServerSessionState;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Server {
@@ -23,6 +26,12 @@ public class Server {
     @Getter
     @Setter
     ServerSessionState serverSessionState;
+
+    @Getter
+    public Map<Server, Channel> channelMap = new ConcurrentHashMap<>();
+
+    @Getter
+    public Map<Peer, Channel> peerChannelMap = new ConcurrentHashMap<>();
 
     public static class Builder{
         private final int port;

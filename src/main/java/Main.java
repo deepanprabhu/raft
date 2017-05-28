@@ -1,11 +1,14 @@
 import cluster.Peer;
 import cluster.Server;
 import cluster.ServerState;
+import flow.LeaderFlow;
 import flow.ServerFlow;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.Arrays;
+import java.util.concurrent.CompletableFuture;
 
 public class Main {
     public static void main(String[] args) throws Exception{
@@ -23,8 +26,10 @@ public class Main {
                     .withPeers(Arrays.asList(Arrays.copyOfRange(args, 1, args.length)))
                     .withState(ServerState.LEADER)
                     .build();
-            for(Peer p : s.getPeers())
-                ServerFlow.connectToPeer(p);
+            for(Peer p : s.getPeers()) {
+                ServerFlow.connectToPeer(s, p);
+            }
+            LeaderFlow.SendHeartBeatRPC(s, s.getPeers());
         }
         else{
             s = new Server.Builder(port)
